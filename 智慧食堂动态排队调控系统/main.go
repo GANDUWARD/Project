@@ -11,22 +11,25 @@ import (
 )
 
 type dataGram struct {
-	exponent string
-	time     string
-	advice   string
+	Exponent string
+	Time     string
+	Advice   string
 }
 
 func dataSend(jdata []byte, conn net.Conn) error {
 	//朝指定ip发送数据
-	conn.Write(jdata)
+	_, err := conn.Write(jdata)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return nil
 }
 func dialdst(address string, exp string, adtime string) {
-	var data dataGram
 	//时间为当前时间，数据为python接口传入的数据
-	data.time = time.Now().Format("2006-1-7-10-41")
-	data.advice = adtime
-	data.exponent = exp
+	data := new(dataGram)
+	data.Time = time.Now().Format("2006-1-7-10-41")
+	data.Advice = adtime
+	data.Exponent = exp
 	d_json, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println(err)
@@ -63,8 +66,8 @@ func main() {
 			fmt.Println("空文件发送！")
 			return
 		}
-		exp := string(buf[:bytes.IndexByte(buf[:], '\t')]) //根据制表符截取拥挤指数
-		adt := string(buf[:bytes.IndexByte(buf[:], '\n')]) //根据回车截取建议时间
+		exp := string(buf[:bytes.IndexByte(buf[:], '\t')])                                    //根据制表符截取拥挤指数
+		adt := string(buf[bytes.IndexByte(buf[:], '\t')+1 : bytes.IndexByte(buf[:], '\n')-1]) //根据回车截取建议时间
 		dialdst(add, exp, adt)
 	}
 }
