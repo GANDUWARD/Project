@@ -13,7 +13,7 @@ var final_out string
 func make_out(info string) {
 	fmt.Println(info)
 	final_out = info
-	http.HandleFunc("/out", Send)
+	time.Sleep(5 * time.Second)
 }
 func Send(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, final_out)
@@ -40,11 +40,13 @@ func main() {
 				return
 			}
 		}
-		make_out(string(buf[:n]))
-		err := http.ListenAndServeTLS(":44329", "ganduward.com_bundle.crt", "ganduward.com.key", nil)
-		if err != nil {
-			fmt.Println(err)
-		}
-		time.Sleep(5 * time.Second)
+		go func() {
+			make_out(string(buf[:n]))
+		}()
+	}
+	http.HandleFunc("/", Send)
+	err2 := http.ListenAndServeTLS(":44329", "ganduward.com_bundle.crt", "ganduward.com.key", nil)
+	if err2 != nil {
+		fmt.Println(err)
 	}
 }
